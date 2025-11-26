@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  monitor-api:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=sqlite:///data/transactions_monitor.db
+      - LOG_LEVEL=INFO
+      - ALERT_THRESHOLD_FAILED=2.0
+      - ALERT_THRESHOLD_DENIED=15.0
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add database service for production
+  # postgres:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_DB: monitoring
+  #     POSTGRES_USER: cloudwalk
+  #     POSTGRES_PASSWORD: secure_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+
+volumes:
+  postgres_data:
